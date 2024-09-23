@@ -14,11 +14,11 @@ capture log close
 * Running this code requires 
 * 1) installing the required .ado files: -grc1leg- by Vince Wiggins, -bspline- by Roger Newson, -sutex- by Antoine Terracol, -xtsemipar- by François Libois and Vincenzo Verardi, and -outtable- by Christopher Baum and Joao Pedro Azevedo
 *    This can be done by entering each of the following at the Stata command prompt:
-*         ssc install bspline
-*         net install grc1leg, from(http://www.stata.com/users/vwiggins)
-*         net install xtsemipar, from(http://fmwww.bc.edu/RePEc/bocode/x)
-*         net install sutex, from(http://fmwww.bc.edu/RePEc/bocode/s)
-*         net install outtable, from(http://fmwww.bc.edu/RePEc/bocode/o)
+        ssc install bspline
+        net install grc1leg, from(http://www.stata.com/users/vwiggins)
+        net install xtsemipar, from(http://fmwww.bc.edu/RePEc/bocode/x)
+        net install sutex, from(http://fmwww.bc.edu/RePEc/bocode/s)
+        net install outtable, from(http://fmwww.bc.edu/RePEc/bocode/o)
 * 2) setting the filepath (below) to your working directory
 * 3) creating a folder called "output" in the working directory
 * 4) placing all six of the required, accompanying data files in the working directory. 
@@ -27,9 +27,9 @@ capture log close
 
 ***** READ DATA AND SET PATHS
 
-global data_folder "/Users/michael_clemens/Dropbox/for BLA group/paper on effects of bracero arrivals/writings/AER publication submission/replication"
+global data_folder "C:\Users\jonat\sciencespo\replication\labor\clemens_immigration\original_data"
 
-global output_folder "$data_folder/output"
+global output_folder "C:\Users\jonat\sciencespo\replication\labor\clemens_immigration\output"
 
 cd "$data_folder"
 use "bracero_aer_dataset.dta", clear
