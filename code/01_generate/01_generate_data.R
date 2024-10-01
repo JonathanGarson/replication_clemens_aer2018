@@ -74,7 +74,7 @@ bracero[, mex_frac_tot := Mexican/(Farmworkers_Hired*1000)]
 ## Merging datasets --------------------------------------------------------
 
 setorderv(bracero, cols = c("State_FIPS","time_m"))
-bracero = merge(bracero, cpi_data, by = c("State_FIPS", "time_m"))
+bracero = merge(bracero, cpi_data, by = c("State_FIPS", "time_m"), all.x = TRUE)
 
 ## Setting real wages ------------------------------------------------------
 
