@@ -136,7 +136,6 @@ replace Mexican_zeros = 0 if Year>=1967 & Mexican_zeros == .
 egen ForNonMexican = rowtotal(Jamaican_final Bahamian_final BWIOthers_final Canadian_final PuertoRican_final OtherForeign_final)
 egen mextot = total(Mexican_zeros), by(time_m)
 egen fornonmextot = total(ForNonMexican), by(time_m)
-
 	
 ***** RESULTS
 
@@ -208,6 +207,7 @@ replace exposure = 1 if low
 replace exposure = 2 if high
 
 
+export delimited using "C:\Users\jonat\sciencespo\replication\labor\clemens_immigration\data\final/final_data_aer.csv", replace
 
 ** Quarterly analysis
 

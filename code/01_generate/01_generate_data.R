@@ -11,8 +11,10 @@ library(ggplot2)
 library(lubridate)
 library(haven)
 library(tictoc)
+library(tinytable)
+library(zoo)
 
-# tic()
+tic()
 # Data Path ---------------------------------------------------------------
 
 raw_path = "data/raw"
@@ -47,6 +49,10 @@ bracero[, quarterly_flag := fcase(
 bracero[, `:=`(
   time_m = make_date(year = Year, month = Month, day = 1),
   time_m_formatted = format(make_date(year = Year, month = Month, day = 1), "%Ym%m")
+)]
+
+bracero[, `:=`(
+  time_q_formatted = factor(paste0(Year,"q",quarterly_flag))
 )]
 
 ## Merge different Mexican Series ----------------------------------------------------
@@ -128,16 +134,25 @@ bracero_exposure_treatment[, mex_frac_year := round(mex_frac_year, 3)]
 bracero_exposure_treatment[, mexican_mean := round(mexican_mean, 0)]
 bracero_exposure_treatment[, HiredWorkersonFarms_mean := round(HiredWorkersonFarms_mean, 0)]
 bracero_exposure_treatment[, TotalHiredSeasonal_mean := round(TotalHiredSeasonal_mean, 0)]
+mex_frac_1955_value = bracero_exposure_treatment[Year == 1955, .(State,mex_frac_year)]
+setnames(mex_frac_1955_value, "mex_frac_year", "mex_frac_1955")
+bracero_exposure_treatment = merge(bracero_exposure_treatment, mex_frac_1955_value, by = c("State"), all.x = T)
 # Create the three groups based on the year 1955
 # Check that all states are treated
 bracero_exposure_treatment[Year == 1955, group := fcase(
-  mex_frac_year >= 0.20, 1,
-  mex_frac_year < 0.20 & mex_frac_year > 0.0, 2,
+  mex_frac_year >= 0.20, 2,
+  mex_frac_year < 0.20 & mex_frac_year > 0.2, 1,
   mex_frac_year == 0, 0
 )]
+bracero_exposure_treatment[, post := (Year >= 1965)*1] #the authors propose to period of treatment, the final exclusion
+bracero_exposure_treatment[, post_2 := (Year >= 1962)*1] # the alternative is 1962 when the wages were mandatory increased
+bracero_exposure_treatment[, post_3 := (Year >= 1960)*1] # I add this one to account for eventual anticipatory effect
+bracero_exposure_treatment[, treatment_frac := post * mex_frac_1955]
+bracero_exposure_treatment[, treatment_frac_2 := post_2 * mex_frac_1955]
 
-# bracero = merge(bracero, bracero_exposure_treatment, by = "State", all.x = T) NOT WORKING
+# We merge the dataset
+bracero = merge(bracero, bracero_exposure_treatment, by = c("State", "Year"), all.x = T) 
 
 write_parquet(bracero, glue("{final_path}/bracero_final.parquet"))
-# toc()
+toc()
 
