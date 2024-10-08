@@ -9,6 +9,17 @@
     ]
   },
   "Packages": {
+    "Formula": {
+      "Package": "Formula",
+      "Version": "1.2-5",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "stats"
+      ],
+      "Hash": "7a29697b75e027767a53fde6c903eca7"
+    },
     "MASS": {
       "Package": "MASS",
       "Version": "7.3-60",
@@ -320,6 +331,18 @@
       ],
       "Hash": "fedd9d00c2944ff00a0e2696ccf048ec"
     },
+    "dreamerr": {
+      "Package": "dreamerr",
+      "Version": "1.4.0",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Formula",
+        "stringmagic",
+        "utils"
+      ],
+      "Hash": "8ff490ff7faf6952d558f046ab9a363a"
+    },
     "evaluate": {
       "Package": "evaluate",
       "Version": "1.0.0",
@@ -355,6 +378,28 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "aa5e1cd11c2d15497494c5292d7ffcc8"
+    },
+    "fixest": {
+      "Package": "fixest",
+      "Version": "0.12.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "Rcpp",
+        "dreamerr",
+        "grDevices",
+        "graphics",
+        "methods",
+        "nlme",
+        "numDeriv",
+        "sandwich",
+        "stats",
+        "stringmagic",
+        "tools",
+        "utils"
+      ],
+      "Hash": "47745b31b09a5707d8197f616364249b"
     },
     "fontawesome": {
       "Package": "fontawesome",
@@ -759,6 +804,16 @@
       ],
       "Hash": "8d1938040a05566f4f7a14af4feadd6b"
     },
+    "numDeriv": {
+      "Package": "numDeriv",
+      "Version": "2016.8-1.1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R"
+      ],
+      "Hash": "df58958f293b166e4ab885ebcad90e02"
+    },
     "pillar": {
       "Package": "pillar",
       "Version": "1.9.0",
@@ -927,6 +982,19 @@
       ],
       "Hash": "062470668513dcda416927085ee9bdc7"
     },
+    "sandwich": {
+      "Package": "sandwich",
+      "Version": "3.1-1",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "stats",
+        "utils",
+        "zoo"
+      ],
+      "Hash": "072bb2d27425f2a58fe71fe1080676ce"
+    },
     "sass": {
       "Package": "sass",
       "Version": "0.4.9",
@@ -960,6 +1028,18 @@
         "viridisLite"
       ],
       "Hash": "c19df082ba346b0ffa6f833e92de34d1"
+    },
+    "stringmagic": {
+      "Package": "stringmagic",
+      "Version": "1.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "Rcpp",
+        "stats",
+        "utils"
+      ],
+      "Hash": "4eb812159ccaf2b0b6e70d1fa23e7515"
     },
     "tibble": {
       "Package": "tibble",
@@ -1154,6 +1234,21 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "51dab85c6c98e50a18d7551e9d49f76c"
+    },
+    "zoo": {
+      "Package": "zoo",
+      "Version": "1.8-12",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Requirements": [
+        "R",
+        "grDevices",
+        "graphics",
+        "lattice",
+        "stats",
+        "utils"
+      ],
+      "Hash": "5c715954112b45499fb1dadc6ee6ee3e"
     }
   }
 }
