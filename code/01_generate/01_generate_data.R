@@ -7,6 +7,7 @@ invisible(gc)
 library(arrow)
 library(data.table)
 library(glue)
+library(ggplot2)
 library(lubridate)
 library(haven)
 library(tictoc)
@@ -113,6 +114,29 @@ bracero[, ForNonMexican := rowSums(.SD, na.rm = TRUE), .SDcols = c("Jamaican_fin
                                                                   "Canadian_final", "PuertoRican_final", "OtherForeign_final")]
 bracero[, mextot := sum(Mexican_zeros, na.rm = TRUE), by = time_m]
 bracero[, fornonmextot := sum(ForNonMexican, na.rm = TRUE), by = time_m]
+
+# Creating the treatment and control groups -------------------------------
+# Create the treatment exposure var
+bracero_exposure_treatment = bracero[, .(mex_frac_year = mean(mex_frac, na.rm = TRUE),
+                                 mexican_mean = mean(Mexican, na.rm = TRUE),
+                                 TotalHiredSeasonal_mean = mean(TotalHiredSeasonal, na.rm = TRUE), 
+                                 HiredWorkersonFarms_mean = mean(HiredWorkersonFarms_final, na.rm = TRUE)),
+                             by = .(State, Year)]
+bracero_exposure_treatment = na.omit(unique(bracero_exposure_treatment))
+# Round the relevant columns
+bracero_exposure_treatment[, mex_frac_year := round(mex_frac_year, 3)]
+bracero_exposure_treatment[, mexican_mean := round(mexican_mean, 0)]
+bracero_exposure_treatment[, HiredWorkersonFarms_mean := round(HiredWorkersonFarms_mean, 0)]
+bracero_exposure_treatment[, TotalHiredSeasonal_mean := round(TotalHiredSeasonal_mean, 0)]
+# Create the three groups based on the year 1955
+# Check that all states are treated
+bracero_exposure_treatment[Year == 1955, group := fcase(
+  mex_frac_year >= 0.20, 1,
+  mex_frac_year < 0.20 & mex_frac_year > 0.0, 2,
+  mex_frac_year == 0, 0
+)]
+
+# bracero = merge(bracero, bracero_exposure_treatment, by = "State", all.x = T) NOT WORKING
 
 write_parquet(bracero, glue("{final_path}/bracero_final.parquet"))
 # toc()

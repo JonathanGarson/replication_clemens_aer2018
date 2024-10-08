@@ -36,6 +36,26 @@ setorderv(bracero55, cols = "mex_frac_year", order = -1)
 # - considering know more qualitative aspect : the states seems to have a high number of total hired workers, mexican are mostly seasonal
 # and then probably entitled with more manual task. More in depth analysis of farm size, arable land, type of culture is necessary
 
+# Robustness --------------------------------------------------------------
+
+## Evolution of the mexican force (exposure treatment) ---------------------
+
+ggplot(bracero_all_years[Year %in% 1950:1970], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
+  geom_line() +
+  geom_point() +
+  geom_vline(xintercept = 1961, linetype = "dashed", color = "red")+
+  geom_vline(xintercept = 1964, linetype = "dashed", color = "red")+
+  theme_minimal() +
+  labs(title = "Evolution of the Ratio of Seasonal Mexican Worker State (1953 - 1970)",
+       x = "Year",
+       y = "Mexican Worker % of Seasonal Worker") +
+  theme(panel.grid.major = element_line(size = 0.5),
+        panel.grid.minor = element_blank(),
+        legend.position = "right") +
+  scale_color_discrete(name = "State")
+
+
+
 ## Work force composition in farms -----------------------------------------
 farmsworkers = bracero[Year == 1955, .(State, Year, Mexican,TotalHiredSeasonal, HiredWorkersonFarms_final)]
 farmsworkers = na.omit(unique(farmsworkers[, .(mean_seasonal = mean(TotalHiredSeasonal, na.rm = T),

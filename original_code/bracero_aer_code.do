@@ -277,7 +277,6 @@ graph twoway line realwage_hourly_none time_q if Year>=1945, c(stairstep) clcolo
 graph export dd_wage_real_hourly_step.pdf, replace
 
 
-
 ** DD wages, quarterly
 
 ** TABLE 1
