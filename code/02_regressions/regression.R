@@ -1,6 +1,6 @@
 # This code replicate the main results found by Clemens & al (2018)
 
-rm(list = ls())
+clear_rm()
 gc()
 
 library(arrow)

@@ -1,6 +1,6 @@
 # This code converts to parquet formats all .dta dataset
 
-rm(list= ls())
+clear_rm()
 gc()
 
 library(arrow)
