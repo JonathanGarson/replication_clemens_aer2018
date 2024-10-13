@@ -446,7 +446,6 @@ sutex Year quarter realwage_hourly realwage_daily ln_Mexican ln_NonMexican treat
 log close
 
 
-
 restore   // Back to monthly data
 		
 * DD domestic employment, monthly
