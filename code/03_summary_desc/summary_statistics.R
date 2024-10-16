@@ -6,11 +6,24 @@ gc()
 library(arrow)
 library(data.table)
 library(ggplot2)
-library(gt)
+library(flextable)
+library(magick)
 
 # Import Data -------------------------------------------------------------
 
 bracero = read_parquet("data/final/bracero_final.parquet")
+
+
+# Tables and figures setting ----------------------------------------------
+
+use_df_printer()
+set_flextable_defaults(
+  theme_fun = theme_booktabs,
+  big.mark = " ", 
+  font.color = "black",
+  border.color = "black",
+  padding = 3,
+)
 
 # Appendix ----------------------------------------------------------------
 
@@ -28,7 +41,19 @@ bracero55[, mexican_mean := round(mexican_mean, )]
 bracero55[, HiredWorkersonFarms_mean := round(HiredWorkersonFarms_mean, )]
 bracero55[, TotalHiredSeasonal_mean := round(TotalHiredSeasonal_mean, )]
 setorderv(bracero55, cols = "mex_frac_year", order = -1)
+bracero55 = rbind(bracero55, bracero55[, lapply(.SD, function(x) if(is.numeric(x)) sum(x, na.rm = TRUE) else NA)], use.names = FALSE)
+bracero55[.N, State := "Sum" ]
 
+bracero55 |> 
+  flextable() |> 
+  autofit() %>% 
+  add_header_lines("Summary table of Mexican workers present in the U.S.A farms in 1955") %>% 
+  set_header_labels(mex_frac_year = "Prop. Seasonal Mexican Workers",
+                    mexican_mean = "Total Mexican Seasonal mexican workers",
+                    TotalHiredSeasonal_mean = "Total Seasonal workers",
+                    HiredWorkersonFarms_mean = "Total Workers on farm") %>% 
+  save_as_image("output/tables/appendix/mexican_usfarms_1955.png")
+  
 
 # Interesting points :
 # - some of the most affected states count a very low total number of Mexican workers in their workforce. 
@@ -48,6 +73,18 @@ bracero60[, mexican_mean := round(mexican_mean, )]
 bracero60[, HiredWorkersonFarms_mean := round(HiredWorkersonFarms_mean, )]
 bracero60[, TotalHiredSeasonal_mean := round(TotalHiredSeasonal_mean, )]
 setorderv(bracero60, cols = "mex_frac_year", order = -1)
+bracero60 = rbind(bracero60, bracero60[, lapply(.SD, function(x) if(is.numeric(x)) sum(x, na.rm = TRUE) else NA)], use.names = FALSE)
+bracero60[.N, State := "Sum" ]
+
+bracero60 |> 
+  flextable() |> 
+  autofit() %>% 
+  add_header_lines("Summary table of Mexican workers present in the U.S.A farms in 1960") %>% 
+  set_header_labels(mex_frac_year = "Prop. Seasonal Mexican Workers",
+                    mexican_mean = "Total Mexican Seasonal mexican workers",
+                    TotalHiredSeasonal_mean = "Total Seasonal workers",
+                    HiredWorkersonFarms_mean = "Total Workers on farm") %>% 
+  save_as_image("output/tables/appendix/mexican_usfarms_1960.png")
 
 ## Evolution of the mexican force (exposure treatment) ---------------------
 bracero_all_years = bracero[,.(State, Year, mex_frac, Mexican, TotalHiredSeasonal, HiredWorkersonFarms_final)]
@@ -83,6 +120,7 @@ ggplot(bracero_all_years[Year %in% 1954:1970], aes(x = Year, y = mex_frac_year, 
         panel.grid.minor = element_blank(),
         legend.position = "right") +
   scale_color_discrete(name = "State")
+ggsave("output/figures/ratio_mexican_all_states.pdf")
 
 ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 %in% 1:2], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
   geom_line() +
@@ -97,8 +135,9 @@ ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 %in% 1:2], a
         panel.grid.minor = element_blank(),
         legend.position = "right") +
   scale_color_discrete(name = "State")
+ggsave("output/figures/ratio_mexican_moderatly_exposed_states.pdf")
 
-ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 == 1], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
+ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 == 0], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
   geom_line() +
   geom_point() +
   geom_vline(xintercept = 1961, linetype = "dashed", color = "red")+
@@ -111,6 +150,7 @@ ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 == 1], aes(x
         panel.grid.minor = element_blank(),
         legend.position = "right") +
   scale_color_discrete(name = "State")
+ggsave("output/figures/ratio_mexican_non_exposed_states.pdf")
 
 # Show the proportion of Mexican worker out of all Mexican per states in a stacked line figures
 
