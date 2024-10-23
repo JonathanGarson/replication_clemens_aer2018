@@ -1,6 +1,6 @@
 # This code is mainly exploratory. It produces descriptive statistics about the different states.
 
-clear_rm()
+rm(list = ls())
 gc()
 
 library(arrow)
@@ -8,11 +8,12 @@ library(data.table)
 library(ggplot2)
 library(flextable)
 library(magick)
+source("./paths.R")
 
 # Import Data -------------------------------------------------------------
 
-bracero = read_parquet("data/final/bracero_final.parquet")
-
+# bracero = read_parquet("data/final/bracero_final.parquet")
+bracero = as.data.table(fread(glue("{final_data}/final_data_aer.csv")))
 
 # Tables and figures setting ----------------------------------------------
 
@@ -44,6 +45,9 @@ setorderv(bracero55, cols = "mex_frac_year", order = -1)
 bracero55 = rbind(bracero55, bracero55[, lapply(.SD, function(x) if(is.numeric(x)) sum(x, na.rm = TRUE) else NA)], use.names = FALSE)
 bracero55[.N, State := "Sum" ]
 
+# We isolate the most exposed states
+bracero55_highexposed = list(bracero55[mex_frac_year >= 0.2 & mex_frac_year <= 1,.(State)])
+
 bracero55 |> 
   flextable() |> 
   autofit() %>% 
@@ -53,7 +57,15 @@ bracero55 |>
                     TotalHiredSeasonal_mean = "Total Seasonal workers",
                     HiredWorkersonFarms_mean = "Total Workers on farm") %>% 
   save_as_image("output/tables/appendix/mexican_usfarms_1955.png")
-  
+
+bracero55 %>% 
+  select(State, mex_frac_year) %>% 
+  filter(mex_frac_year >0) %>%
+  flextable() %>% 
+  autofit() %>% 
+  add_header_lines("Proportion of Mexican seasonal workers among seasonal workers in U.S.A. farms in 1955") %>% 
+  set_header_labels(mex_frac_year = "Prop. Seasonal Mexican Workers") %>% 
+  save_as_image("output/tables/main/mexicain_usfarms_1955_short.png")
 
 # Interesting points :
 # - some of the most affected states count a very low total number of Mexican workers in their workforce. 
@@ -76,6 +88,11 @@ setorderv(bracero60, cols = "mex_frac_year", order = -1)
 bracero60 = rbind(bracero60, bracero60[, lapply(.SD, function(x) if(is.numeric(x)) sum(x, na.rm = TRUE) else NA)], use.names = FALSE)
 bracero60[.N, State := "Sum" ]
 
+# We select the most affected state in 1960
+bracero60_highexposed = (list(bracero60[mex_frac_year >= 0.2 & mex_frac_year <= 1,.(State)]))
+bracero_fallen = setdiff(unlist(bracero55_highexposed), unlist(bracero60_highexposed)) # collecting the state who are less exposed in 1960
+bracero55_highexposed = setdiff(unlist(bracero55_highexposed), bracero_fallen)
+
 bracero60 |> 
   flextable() |> 
   autofit() %>% 
@@ -84,7 +101,25 @@ bracero60 |>
                     mexican_mean = "Total Mexican Seasonal mexican workers",
                     TotalHiredSeasonal_mean = "Total Seasonal workers",
                     HiredWorkersonFarms_mean = "Total Workers on farm") %>% 
+  style(i = ~State %in%  unlist(bracero55_highexposed), 
+        pr_t = fp_text_default(
+          italic = TRUE,
+          color = "red")) %>%
+  style(i = ~State %in%  unlist(bracero_fallen), 
+        pr_t = fp_text_default(
+          italic = TRUE,
+          color = "blue")) %>%
   save_as_image("output/tables/appendix/mexican_usfarms_1960.png")
+
+bracero60 %>% 
+  select(State, mex_frac_year) %>% 
+  filter(mex_frac_year >0) %>%
+  flextable() %>% 
+  autofit() %>% 
+  add_header_lines("Proportion of Mexican seasonal workers among seasonal workers in U.S.A. farms in 1960") %>% 
+  set_header_labels(mex_frac_year = "Prop. Seasonal Mexican Workers") %>% 
+  save_as_image("output/tables/main/mexicain_usfarms_1960_short.png")
+
 
 ## Evolution of the mexican force (exposure treatment) ---------------------
 bracero_all_years = bracero[,.(State, Year, mex_frac, Mexican, TotalHiredSeasonal, HiredWorkersonFarms_final)]

@@ -1,6 +1,6 @@
 # This code replicate the main results found by Clemens & al (2018)
 
-clear_rm()
+rm(list = setdiff(ls(), keep))
 gc()
 
 library(arrow)
@@ -13,10 +13,12 @@ library(webshot2)
 library(gt)
 library(glue)
 library(kableExtra)
+source("./paths.R")
 
 # Import Data -------------------------------------------------------------
 
 data_final = as.data.table(fread(glue("{final_data}/final_data_aer.csv")))
+# data_final = as.data.table(read_parquet(glue("{final_data}/bracero_final.parquet")))
 
 # Table 1 -----------------------------------------------------------------
 tab1 = copy(data_final)
