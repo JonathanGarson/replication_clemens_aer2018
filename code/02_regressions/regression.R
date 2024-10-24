@@ -3,6 +3,8 @@
 rm(list = setdiff(ls(), keep))
 gc()
 
+source("./paths.R")
+source("./code/functions/output_functions.R")
 library(arrow)
 library(data.table)
 library(fixest)
@@ -13,7 +15,7 @@ library(webshot2)
 library(gt)
 library(glue)
 library(kableExtra)
-source("./paths.R")
+library(ggplot2)
 
 # Import Data -------------------------------------------------------------
 
@@ -110,3 +112,110 @@ modelsummary(
   coef_rename = c("treatment_frac" = "BraceroExclusion1965 * ExposureToExclusion"),
   gof_omit = 'R2 Within|R2 Within Adj.|AIC|BIC|RMSE|Std.Errors'
 )
+
+# Comment Tables ----------------------------------------------------------
+## Pretrend analysis -------------------------------------------------------
+# We set a date has being the reference treatment point, here 1965q1. We will test for 1961 and took it to yearly effect
+tab1[, distance_treat_1965 := (Year - 1965)*4 + (quarter - 1)]
+
+hourly_full = feols(realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab1)
+daily_full = feols(realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab1)
+hourly_ln = feols(ln_realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab1)
+daily_ln = feols(ln_realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab1)
+
+result_hourly_full = retrieve_result(hourly_full)
+result_daily_full = retrieve_result(daily_full)
+result_hourly_ln = retrieve_result(hourly_ln)
+result_daily_ln = retrieve_result(daily_ln)
+
+event_study_plot(result_hourly_full, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_full, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_et.pdf")
+event_study_plot(result_hourly_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_et.pdf")
+
+# look for distinction between states
+# We trim our data to regress still on 1955 but distinguishing by treatment intensity.
+# Highly treated are above 20% exposure, low treated are between 0% and 20%, and  the rest is control (following Clemens & al)
+tab1[, group := fcase(
+  mex_frac_55 >= 0.2, 2,
+  mex_frac_55 > 0 & mex_frac_55 < 0.2, 1,
+  default = 0
+)]
+
+tab_high = tab1[group %in% c(0,2),]
+
+hourly_full_high = feols(realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+daily_full_high = feols(realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+hourly_ln_high = feols(ln_realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+daily_ln_high = feols(ln_realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+
+result_hourly_full_high = retrieve_result(hourly_full_high)
+result_daily_full_high = retrieve_result(daily_full_high)
+result_hourly_ln_high = retrieve_result(hourly_ln_high)
+result_daily_ln_high = retrieve_result(daily_ln_high)
+
+event_study_plot(result_hourly_full_high, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in most exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_high_et.pdf")
+event_study_plot(result_daily_full_high, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in most exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_high_et.pdf")
+event_study_plot(result_hourly_ln_high, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in most exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_high_et.pdf")
+event_study_plot(result_daily_ln_high, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in most exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_high_et.pdf")
+
+# Low treated
+tab_low = tab1[group %in% c(0,1),]
+
+hourly_full_low = feols(realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
+daily_full_low = feols(realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
+hourly_ln_low = feols(ln_realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
+daily_ln_low = feols(ln_realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
+
+result_hourly_full_low = retrieve_result(hourly_full_low)
+result_daily_full_low = retrieve_result(daily_full_low)
+result_hourly_ln_low = retrieve_result(hourly_ln_low)
+result_daily_ln_low = retrieve_result(daily_ln_low)
+
+event_study_plot(result_hourly_full_low, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in low exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_low_et.pdf")
+event_study_plot(result_daily_full_low, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in low exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_low_et.pdf")
+event_study_plot(result_hourly_ln_low, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in low exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_low_et.pdf")
+event_study_plot(result_daily_ln_low, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in low exposed States in 1955", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_low_et.pdf")
+
+# look for heterogeneity between quarters
+# We exclude the quarter 1 from the analysis to avoid some seasonality issues
+tab_sort_q = tab1[quarter %in% 2:4]
+tab_sort_q[, distance_treat_1965 := (Year - 1965)*3 + (quarter )]
+
+hourly_sort = feols(realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_sort_q)
+daily_sort = feols(realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_sort_q)
+hourly_sort_ln = feols(ln_realwage_hourly ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_sort_q)
+daily_sort_ln = feols(ln_realwage_daily ~ i(distance_treat_1965, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_sort_q)
+
+result_hourly_sort = retrieve_result(hourly_sort)
+result_daily_sort = retrieve_result(daily_sort)
+result_hourly_sort_ln = retrieve_result(hourly_sort_ln)
+result_daily_sort_ln = retrieve_result(daily_sort_ln)
+
+event_study_plot(result_hourly_sort, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = F, output_path = "output/figures/regression/real_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_sort, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = F, output_path = "output/figures/regression/real_daily_bracero55_et.pdf")
+event_study_plot(result_hourly_sort, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = F, output_path = "output/figures/regression/log_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_sort, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = F, output_path = "output/figures/regression/log_daily_bracero55_et.pdf")
+
+## de Chaisemartin ------------------------------------------------------
+
+
+## Ponderation -------------------------------------------------------------
+
+

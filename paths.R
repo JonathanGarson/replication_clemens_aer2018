@@ -1,6 +1,6 @@
 if (Sys.getenv("USERNAME") == "jonat"){
   setwd(dir = "C:/Users/jonat/sciencespo/replication/labor/clemens_immigration")
-} else if(Sys.getenv("USER" == "nuvolos")){
+} else if(Sys.getenv("USER") == "nuvolos"){
   setwd(dir = "/files/")
 }
 
