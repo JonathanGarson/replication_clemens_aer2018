@@ -239,35 +239,11 @@ event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusi
 
 # Ponderation -------------------------------------------------------------
 
-## Propensity Score --------------------------------------------------------
-# Probably to much missing data to do this kind of estimation
+## de Chaisemartin ------------------------------------------------------
 
-# make the treatment binary, I consider that there is only the highly treated as treated and the rest is 0
-tab[, group_binary := ifelse(group == 2, 1, 0)]
-
-# List of crops
-crops <- c("Cotton", "Tomatoes_total", "Lettuce", "Strawberries_total", "Citrus","Asparagus_total")
-# arable land 
-arable_land = c("dom_area", "farm_tot_57")
-
-# Combine all matching variables
-matching_var = paste(c(crops, arable_land), collapse = " + ")
-
-# Clean data so that we only have full observation
-tab_match = tab[, .SD, .SDcols = c("group_binary", "State", "Year", crops)]
-tab_match_clean = drop_na(tab_match) # very surprinsgly the data on crop production are available for California
-
-# Convert into formula
-matching_formula <- as.formula(paste("group_binary ~", matching_var))
-
-# Use the defined formula directly in matchit
-matching_result <- matchit(formula = matching_formula, data = tab, method = "nearest", distance = "glm")
 
 
 # SDiD --------------------------------------------------------------------
-
-
-# de Chaisemartin ------------------------------------------------------
 
 
 
