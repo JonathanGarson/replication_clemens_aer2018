@@ -4,7 +4,7 @@ retrieve_result = function(reg){
   
   # Extract the distance to treatment (numeric part before "::")
   # exposure = as.numeric(gsub("^.*distance_treat_1965::(-?[0-9]+):.*$", "\\1", names(summary$coefficients)))
-  exposure = as.numeric(gsub("^.*distance_treat_196[0-9](?:_year)?::?(-?[0-9]+).*", "\\1", names(summary$coefficients)))
+  exposure = as.numeric(gsub("^.*distance_treat_196[0-9](?:_year|_q)?::?(-?[0-9]+).*", "\\1", names(summary$coefficients)))
   
   # Build the summary table
   tables = data.frame(
