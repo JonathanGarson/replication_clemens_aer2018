@@ -133,10 +133,33 @@ bracero_all_years[, mexican_mean := round(mexican_mean, )]
 bracero_all_years[, HiredWorkersonFarms_mean := round(HiredWorkersonFarms_mean, )]
 bracero_all_years[, TotalHiredSeasonal_mean := round(TotalHiredSeasonal_mean, )]
 
+# A table to know them all 
+# Generate the table with unique state counts by Year and treatment_status
+bracero_all_years[Year %in% 1950:1960, treatment_status := fcase(
+  mex_frac_year >= 0.2, "Treated",
+  mex_frac_year > 0 & mex_frac_year < 0.2, "Low_Treated",
+  mex_frac_year == 0, "Non_Treated"
+)]
+# Check stability: flag as switcher if group_cm changes over years 1955-1960
+bracero_all_years[Year %in% 1950:1960, stability_check := uniqueN(treatment_status, na.rm = TRUE), by = State]
+bracero_all_years[stability_check > 1, switcher_status := "Switcher"]
+bracero_all_years[stability_check == 1, switcher_status := "Stayer"]
+bracero_summary = bracero_all_years[Year %in% 1950:1960, .(unique_states = uniqueN(State)), by = .(Year, treatment_status)]
+bracero_summary = dcast(bracero_summary, Year ~ treatment_status, value.var = "unique_states", fill = 0)
+setnames(bracero_summary, c("Non_Treated", "Low_Treated", "Treated"), c("Not Treated", "Low Treated", "Treated"))
+bracero_summary[, Total := rowSums(.SD), .SDcols = c("Not Treated", "Low Treated", "Treated")]
+
+bracero_summary %>% 
+  flextable(col_keys = c("Year","Not Treated", "Low Treated", "Treated", "Total")) %>%
+  autofit() %>% 
+  add_header_lines("Evolution of Treated, Low treated, and Control group") %>% 
+  colformat_num(big.mark = "") %>% 
+  save_as_image(path = glue("{output_tables}/main/evolution_group_bracero.png"))
+  
 # We set the groups to distinguish them
 bracero_all_years[, group_treatment := fcase(
   Year == 1955 & mex_frac_year >= 0.20, 2,
-  Year == 1955 & mex_frac_year < 0.20 & mex_frac_year > 0.05, 1,
+  Year == 1955 & mex_frac_year < 0.20 & mex_frac_year >= 0.05, 1,
   default = 0 
 )]
 group_1955 = bracero_all_years[Year == 1955, .(State, group_treatment)]
