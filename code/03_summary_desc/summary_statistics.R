@@ -8,6 +8,7 @@ library(data.table)
 library(ggplot2)
 library(flextable)
 library(magick)
+library(glue)
 source("./paths.R")
 
 # Import Data -------------------------------------------------------------
@@ -165,28 +166,32 @@ bracero_all_years[, group_treatment := fcase(
 group_1955 = bracero_all_years[Year == 1955, .(State, group_treatment)]
 bracero_all_years = merge(bracero_all_years, group_1955, by = "State", all.x = TRUE, suffixes = c("", "_1955"))
 
-ggplot(bracero_all_years[Year %in% 1954:1970], aes(x = Year, y = mex_frac_year, color = factor(group_treatment_1955), group = State)) +
+ggplot(bracero_all_years[Year %in% 1953:1970], aes(x = Year, y = mex_frac_year, color = factor(group_treatment_1955), group = State)) +
   geom_line() +
   geom_point() +
+  geom_vline(xintercept = 1955, linetype = "dashed", color = "purple")+
   geom_vline(xintercept = 1961, linetype = "dashed", color = "red")+
   geom_vline(xintercept = 1964, linetype = "dashed", color = "red")+
   theme_minimal() +
-  labs(title = "Evolution of the Ratio of Seasonal Mexican Worker State (1954 - 1970)",
+  labs(
+    # title = "Evolution of the Ratio of Seasonal Mexican Worker State (1954 - 1970)",
        x = "Year",
        y = "Mexican Worker % of Seasonal Worker") +
   theme(panel.grid.major = element_line(size = 0.5),
         panel.grid.minor = element_blank(),
         legend.position = "right") +
-  scale_color_discrete(name = "State")
-ggsave("output/figures/ratio_mexican_all_states.pdf")
+  scale_color_discrete(name = "State", labels = c("Control", "Low Exposure", "High Exposure", "Rhode Island \nand New Hampshire"))
+ggsave("output/figures/ratio_mexican_all_states.pdf", width = 10, height = 7)
 
-ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 %in% 1:2], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
+ggplot(bracero_all_years[Year %in% 1953:1970 & group_treatment_1955 %in% 1:2], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
   geom_line() +
   geom_point() +
+  geom_vline(xintercept = 1955, linetype = "dashed", color = "purple")+
   geom_vline(xintercept = 1961, linetype = "dashed", color = "red")+
   geom_vline(xintercept = 1964, linetype = "dashed", color = "red")+
   theme_minimal() +
-  labs(title = "Evolution of the Ratio of Seasonal Mexican Worker State \nin the moderatly and highly exposed states (1954 - 1970)",
+  labs(
+      # title = "Evolution of the Ratio of Seasonal Mexican Worker State \nin the moderatly and highly exposed states (1954 - 1970)",
        x = "Year",
        y = "Mexican Worker % of Seasonal Worker") +
   theme(panel.grid.major = element_line(size = 0.5),
@@ -195,13 +200,15 @@ ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 %in% 1:2], a
   scale_color_discrete(name = "State")
 ggsave("output/figures/ratio_mexican_moderatly_exposed_states.pdf")
 
-ggplot(bracero_all_years[Year %in% 1954:1970 & group_treatment_1955 == 0], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
+ggplot(bracero_all_years[Year %in% 1953:1970 & group_treatment_1955 == 0], aes(x = Year, y = mex_frac_year, color = State, group = State)) +
   geom_line() +
   geom_point() +
+  geom_vline(xintercept = 1955, linetype = "dashed", color = "purple")+
   geom_vline(xintercept = 1961, linetype = "dashed", color = "red")+
   geom_vline(xintercept = 1964, linetype = "dashed", color = "red")+
   theme_minimal() +
-  labs(title = "Evolution of the Ratio of Seasonal Mexican Worker State in the non Exposed States (1954 - 1970)",
+  labs(
+       # title = "Evolution of the Ratio of Seasonal Mexican Worker State in the non Exposed States (1954 - 1970)",
        x = "Year",
        y = "Mexican Worker % of Seasonal Worker") +
   theme(panel.grid.major = element_line(size = 0.5),

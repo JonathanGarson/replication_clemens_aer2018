@@ -41,7 +41,8 @@ retrieve_result = function(reg){
 event_study_plot = function(data, title = "title", x_label = "distance_to_treat", y_label = "estimate", save = FALSE, output_path = "."){
   
   plot_et = ggplot(data, aes(x = dist_to_treat, y = estimate)) +
-    geom_point(aes(shape = as.factor(shape)), color = "blue", size = 3) +  # Map shape aesthetic to 'shape'
+    # geom_point(aes(shape = as.factor(shape)), color = "blue", size = 3) +  # Map shape aesthetic to 'shape'
+    geom_point(color = "blue", size = 3) +  # Map shape aesthetic to 'shape'
     geom_hline(yintercept = 0, linetype = "solid", color = "black") +
     geom_vline(xintercept = 0, linetype = "dashed", color = "red") + 
     geom_errorbar(aes(ymin = ci_low_95 , ymax = ci_high_95), width = 0.2, color = "blue") +  # 95% CI
@@ -49,10 +50,10 @@ event_study_plot = function(data, title = "title", x_label = "distance_to_treat"
          x = x_label,
          y = y_label) +
     theme_minimal() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-    scale_shape_manual(values = c(15, 17, 21), 
-                       labels = c( "Significant at 5%","Significant at 10%","Not Significant")) # Map shapes
-  
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+    # scale_shape_manual(values = c(15, 17, 21), 
+    #                    labels = c( "Significant at 5%","Significant at 10%","Not Significant")) # Map shapes
+    # 
   if (save){
     ggsave(output_path, plot = plot_et, width = 10, height = 7)
   }
