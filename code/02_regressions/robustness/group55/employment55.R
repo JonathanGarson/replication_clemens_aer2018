@@ -15,7 +15,7 @@ library(glue)
 library(ggplot2)
 library(MatchIt)
 library(modelsummary)
-library(synthdid)
+library(tidysynth)
 library(tinytex)
 library(tidyverse)
 library(webshot2)
@@ -219,15 +219,29 @@ event_study_plot(result_daily_ln_low, title = "Effect of Bracero worker exclusio
 domestic = feols(domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
 domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
 
+# 1961
+domestic_61 = feols(domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+domestic_ln_61 = feols(ln_domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+
 #ban
 domestic_ban_year = retrieve_result(domestic)
 domestic_ban_ln_year = retrieve_result(domestic_ln)
+
+# regulation
+domestic_ban_year_61 = retrieve_result(domestic_61)
+domestic_ban_ln_year_61 = retrieve_result(domestic_ln_61)
 
 #ban
 event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_et.pdf")
 event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_et.pdf")
+
+#regulation
+event_study_plot(domestic_ban_year_61, title = "Effect of Bracero worker regulation on domestic employment of seasonal workers for exclusion in 1961", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_1961_et.pdf")
+event_study_plot(domestic_ban_ln_year_61, title = "Effect of Bracero worker regulation on domestic employment of seasonal workers for exclusion in 1961", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_1961_et.pdf")
 
 ## High --------------------------------------------------------------------
 
@@ -255,9 +269,9 @@ event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusi
                  x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_high_et.pdf")
 
 #regulation
-event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
-                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = F, output_path = "output/figures/regression/domestic_employment_bracero55_year_high_et_1961.pdf")
-event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker regulation (1962) on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_high_et_1961.pdf")
+event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker regulation (1962) on domestic employment of seasonal workers \nin the most exposed states", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_high_et_1961.pdf")
 
 ## Low ---------------------------------------------------------------------
@@ -279,49 +293,20 @@ domestic_reg_year_61 = retrieve_result(domestic_61)
 domestic_reg_ln_year_61 = retrieve_result(domestic_ln_61)
 
 #ban
-event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the low exposed states", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_low_et.pdf")
-event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the low exposed states", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_low_et.pdf")
 
 #regulation
-event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker regulation (1962) on domestic employment of seasonal workers \nin the low exposed states", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_low_et_1961.pdf")
-event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker regulation (1962) on domestic employment of seasonal workers \nin the low exposed states", 
                  x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_low_et_1961.pdf")
 
 # Alternative method of estimations -------------------------------------------------------------
 
-## Sant'Anna/de Chaisemartin ------------------------------------------------------
-
-### Formatting Data ---------------------------------------------------------
-
-tab_reduced = copy(tab)
-tab_reduced = tab_reduced[, .SD, .SDcols = c('State', 'Year', 'time_q', 'State_FIPS', 'mex_frac_tot', "mex_frac_year",'realwage_hourly', 'realwage_daily',
-                                             "ln_realwage_hourly", "ln_realwage_daily", "realwage_hourly_year", "realwage_daily_year",
-                                             "realwage_hourly_year_ln", "realwage_daily_year_ln", "group")]
-
-# Classify groups dynamically, using any() to check conditions across years 1955-1960 for each State
-tab_reduced[Year %in% 1955:1960, treatment_status := fcase(
-  mex_frac_year >= 0.2, "Treated",
-  mex_frac_year > 0 & mex_frac_year < 0.2, "Low_Treated",
-  mex_frac_year == 0, "Non_Treated"
-)]
-
-# Check stability: flag as switcher if group_cm changes over years 1955-1960
-tab_reduced[Year %in% 1955:1960, stability_check := uniqueN(treatment_status, na.rm = TRUE), by = State]
-tab_reduced[stability_check > 1, switcher_status := "Switcher"]
-tab_reduced[stability_check == 1, switcher_status := "Stayer"]
-
-status = na.omit(unique(tab_reduced[, .(State, switcher_status)]))
-tab_reduced[, stability_check := NULL]
-tab_reduced = merge(tab_reduced, status, by = "State", all.x = TRUE)
-
-
-
-
-
-## SDiD --------------------------------------------------------------------
+## Synthetic Control --------------------------------------------------------------------
 
 
 
