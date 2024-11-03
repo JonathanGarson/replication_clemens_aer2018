@@ -131,37 +131,57 @@ event_study_plot(result_daily_ln_61, title = "Effect of Bracero worker exclusion
 ## High --------------------------------------------------------------------
 
 #ban
-hourly_full_high = feols(realwage_hourly ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_full_high = feols(realwage_daily ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-hourly_ln_high = feols(ln_realwage_hourly ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_ln_high = feols(ln_realwage_daily ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic = feols(domestic_seasonal ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+local = feols(Local_final ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+intrastate = feols(Intrastate_final ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+interstate = feols(Interstate_final ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+local_ln = feols(ln_local ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+intrastate_ln = feols(ln_intrastate ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+interstate_ln = feols(ln_interstate ~ i(distance_treat_1965_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
 
 #regulation
-hourly_full_high_61 = feols(realwage_hourly ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_full_high_61 = feols(realwage_daily ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-hourly_ln_high_61 = feols(ln_realwage_hourly ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_ln_high_61 = feols(ln_realwage_daily ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic = feols(domestic_seasonal ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+local = feols(Local_final ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+intrastate = feols(Intrastate_final ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+interstate = feols(Interstate_final ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+local_ln = feols(ln_local ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+intrastate_ln = feols(ln_intrastate ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+interstate_ln = feols(ln_interstate ~ i(distance_treat_1961_q, mex_frac_55, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
 
 #ban
-result_hourly_full_high = retrieve_result(hourly_full_high)
-result_daily_full_high = retrieve_result(daily_full_high)
-result_hourly_ln_high = retrieve_result(hourly_ln_high)
-result_daily_ln_high = retrieve_result(daily_ln_high)
+domestic_ban = retrieve_result(domestic)
+domestic_ln_ban = retrieve_result(domestic_ln)
+local_ban = retrieve_result(local)
+intrastate_ban = retrieve_result(intrastate)
+interstate_ban = retrieve_result(interstate)
+local_ban_ln = retrieve_result(local_ln)
+intrastate_ban_ln = retrieve_result(intrastate_ln)
+interstate_ban_ln = retrieve_result(interstate_ln)
+
 #regulation
 result_hourly_full_high_61 = retrieve_result(hourly_full_high_61)
 result_daily_full_high_61 = retrieve_result(daily_full_high_61)
 result_hourly_ln_high_61 = retrieve_result(hourly_ln_high_61)
 result_daily_ln_high_61 = retrieve_result(daily_ln_high_61)
 
-
-event_study_plot(result_hourly_full_high, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_high_et.pdf")
-event_study_plot(result_daily_full_high, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_high_et.pdf")
-event_study_plot(result_hourly_ln_high, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_high_et.pdf")
-event_study_plot(result_daily_ln_high, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_high_et.pdf")
+event_study_plot(domestic_ban, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (thousand)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_high_et.pdf")
+event_study_plot(domestic_ln_ban, title = "Effect of Bracero worker exclusion on domestic (log) employment of seasonal workers \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label =  "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_high_et.pdf")
+event_study_plot(local_ban, title = "Effect of Bracero worker exclusion on local employment \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/local_employment_bracero55_high_et.pdf")
+event_study_plot(intrastate_ban, title = "Effect of Bracero worker exclusion on intrastate employment \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/intrastate_employment_bracero55_high_et.pdf")
+event_study_plot(interstate_ban, title = "Effect of Bracero worker exclusion on interstate employment \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/interstate_employment_bracero55_high_et.pdf")
+event_study_plot(local_ban_ln, title = "Effect of Bracero worker exclusion on local employment (log) \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/local_employment_ln_bracero55_high_et.pdf")
+event_study_plot(intrastate_ban_ln, title = "Effect of Bracero worker exclusion on intrastate employment (log) \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/intrastate_employment_ln_bracero55_high_et.pdf")
+event_study_plot(interstate_ban_ln, title = "Effect of Bracero worker exclusion on interstate employment (log) \n in most exposed states", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/interstate_employment_ln_bracero55_high_et.pdf")
 
 event_study_plot(result_hourly_full_high_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in most exposed States in 1955", 
                  x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_high_et.pdf")
@@ -195,76 +215,80 @@ event_study_plot(result_daily_ln_low, title = "Effect of Bracero worker exclusio
 
 # Year frequency -----------------------------------------------------
 
+## All ---------------------------------------------------------------------
+domestic = feols(domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+
+#ban
+domestic_ban_year = retrieve_result(domestic)
+domestic_ban_ln_year = retrieve_result(domestic_ln)
+
+#ban
+event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_et.pdf")
+event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_et.pdf")
+
 ## High --------------------------------------------------------------------
 
 # High exposed group
 #ban
-hourly_year = feols(realwage_hourly_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_year = feols(realwage_daily_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-hourly_year_ln = feols(realwage_hourly_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_year_ln = feols(realwage_daily_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic = feols(domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_high)
+domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_high)
 
 #regulation
-hourly_year_61 = feols(realwage_hourly_year ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_year_61 = feols(realwage_daily_year ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-hourly_year_ln_61 = feols(realwage_hourly_year_ln ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
-daily_year_ln_61 = feols(realwage_daily_year_ln ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_high)
+domestic_61 = feols(domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_high)
+domestic_ln_61 = feols(ln_domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_high)
 
 #ban
-result_hourly_year = retrieve_result(hourly_year)
-result_daily_year = retrieve_result(daily_year)
-result_hourly_year_ln = retrieve_result(hourly_year_ln)
-result_daily_year_ln = retrieve_result(daily_year_ln)
+domestic_ban_year = retrieve_result(domestic)
+domestic_ban_ln_year = retrieve_result(domestic_ln)
 
 #regulation
-result_hourly_year_61 = retrieve_result(hourly_year_61)
-result_daily_year_61 = retrieve_result(daily_year_61)
-result_hourly_year_ln_61 = retrieve_result(hourly_year_ln_61)
-result_daily_year_ln_61 = retrieve_result(daily_year_ln_61)
+domestic_reg_year_61 = retrieve_result(domestic_61)
+domestic_reg_ln_year_61 = retrieve_result(domestic_ln_61)
 
 #ban
-event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_et.pdf")
-event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_et.pdf")
+event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_high_et.pdf")
+event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_high_et.pdf")
 
 #regulation
-event_study_plot(result_hourly_year_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_et.pdf")
-event_study_plot(result_hourly_year_ln_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year_ln_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_et.pdf")
-
+event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = F, output_path = "output/figures/regression/domestic_employment_bracero55_year_high_et_1961.pdf")
+event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_high_et_1961.pdf")
 
 ## Low ---------------------------------------------------------------------
 
-hourly_year = feols(realwage_hourly_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
-daily_year = feols(realwage_daily_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
-hourly_year_ln = feols(realwage_hourly_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
-daily_year_ln = feols(realwage_daily_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab_low)
+#ban
+domestic = feols(domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_low)
+domestic_ln = feols(ln_domestic_seasonal ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_low)
+
+#regulation
+domestic_61 = feols(domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_low)
+domestic_ln_61 = feols(ln_domestic_seasonal ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab_low)
 
 #ban
-result_hourly_year = retrieve_result(hourly_year)
-result_daily_year = retrieve_result(daily_year)
-result_hourly_year_ln = retrieve_result(hourly_year_ln)
-result_daily_year_ln = retrieve_result(daily_year_ln)
+domestic_ban_year = retrieve_result(domestic)
+domestic_ban_ln_year = retrieve_result(domestic_ln)
+
+#regulation
+domestic_reg_year_61 = retrieve_result(domestic_61)
+domestic_reg_ln_year_61 = retrieve_result(domestic_ln_61)
 
 #ban
-event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_et.pdf")
-event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_et.pdf")
-event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_et.pdf")
+event_study_plot(domestic_ban_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_low_et.pdf")
+event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_low_et.pdf")
+
+#regulation
+event_study_plot(domestic_reg_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (thousands)", save = T, output_path = "output/figures/regression/domestic_employment_bracero55_year_low_et_1961.pdf")
+event_study_plot(domestic_reg_ln_year_61, title = "Effect of Bracero worker exclusion on domestic employment of seasonal workers \nin the most exposed states", 
+                 x_label = "Distance to treatment (year)", y_label = "Employment (log)", save = T, output_path = "output/figures/regression/domestic_employment_ln_bracero55_year_low_et_1961.pdf")
 
 # Alternative method of estimations -------------------------------------------------------------
 
