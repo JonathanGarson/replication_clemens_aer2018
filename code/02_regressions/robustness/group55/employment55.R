@@ -51,8 +51,8 @@ tab[, distance_treat_1961_year := (Year - 1961)]
 # We generate fraction of seasonal Mexican worker for each year 
 tab = tab[, mex_frac_year := mean(mex_frac, na.rm = T),by = c("State", "Year")]
 tab[, mex_frac_year := round(mex_frac_year, 3)]
-mex_frac_year_1958 = unique(tab[Year == 1958, .(mex_frac_year, State, Year)])
-tab = merge(tab, mex_frac_year_1958, by = c("State", "Year"))
+mex_frac_year_1958 = unique(tab[Year == 1958, .(mex_frac_year, State)])
+tab = merge(tab, mex_frac_year_1958, by = c("State"))
 
 # Highly treated are above 20% exposure, low treated are between 0% and 20%, and  the rest is control (following Clemens & al)
 tab[, group := fcase(
@@ -357,6 +357,10 @@ event_study_plot(domestic_ban_ln_year, title = "Effect of Bracero worker exclusi
 ## Synthetic Control --------------------------------------------------------------------
 
 ### California --------------------------------------------------------------
+cols = c("State", "Year","domestic_seasonal","realwage_hourly","realwage_daily","Cotton_machine","Sugarbeet_machine","Tractors",
+         "Cotton","Tomatoes_total","Lettuce","Strawberries_total","Citrus","Cantaloupes","BrusselsSprouts",
+         "Asparagus_total", "Celery", "Cucumbers_pickle")
+
 tab_sc <- tab %>%
   select(all_of(cols)) %>%
   group_by(State, Year) %>%
@@ -380,11 +384,11 @@ tab_sc <- tab %>%
             .groups = 'drop')
 
 # Filter data to retain only complete rows for all relevant columns
-tab_sc_clean <- tab_sc %>%
-  filter(complete.cases(domestic_seasonal, Cotton, Tomatoes_total, Strawberries_total, Tractors))
+#tab_sc_clean <- tab_sc %>%
+ # filter(complete.cases(domestic_seasonal, Cotton, Tomatoes_total, Strawberries_total, Tractors))
 
 # Drop treated States
-tab_sc_clean = tab_sc_clean %>% 
+tab_sc_clean = tab_sc %>% 
   filter(!State %in% c("TX", "AR", "AZ", "COL", "NM", "NV"))
 
 # Synthetic control setup
