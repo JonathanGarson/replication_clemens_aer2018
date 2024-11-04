@@ -43,9 +43,16 @@ tab[, distance_treat_1961_q := (Year - 1961)*4 + (quarter - 1)] # treatment in 1
 tab[, distance_treat_1965_year := (Year - 1965)]
 tab[, distance_treat_1961_year := (Year - 1961)]
 
+# Generate a year wage
+tab[, annual_hourly_wage := mean(realwage_hourly, na.rm = TRUE), by = .(Year, State)]
+tab[, annual_daily_wage := mean(realwage_daily, na.rm = TRUE), by = .(Year, State)]
+
 # We generate fraction of seasonal Mexican worker for each year 
 tab = tab[, mex_frac_year := mean(mex_frac, na.rm = T),by = c("State", "Year")]
 tab[, mex_frac_year := round(mex_frac_year, 3)]
+mex_frac_year_1958 = unique(tab[Year == 1958, .(mex_frac_year, State)])
+setnames(mex_frac_year_1958, "mex_frac_year", 'mex_frac_58')
+tab = merge(tab, mex_frac_year_1958, by = c("State"), all.x = T)
 
 # Highly treated are above 20% exposure, low treated are between 0% and 20%, and  the rest is control (following Clemens & al)
 tab[, group := fcase(
@@ -54,8 +61,17 @@ tab[, group := fcase(
   default = 0
 )]
 
+tab[, group_58 := fcase(
+  mex_frac_58 >= 0.2, 2,
+  mex_frac_58 > 0 & mex_frac_58 < 0.2, 1,
+  default = 0
+)]
+
 tab_high = tab[group %in% c(0,2),]
 tab_low = tab[group %in% c(0,1)]
+
+tab_high = tab[group_58 %in% c(0,2),]
+tab_low = tab[group_58 %in% c(0,1)]
 
 # Pretrend analysis -------------------------------------------------------
 # Full sample, quaterly rate
@@ -85,24 +101,31 @@ result_daily_ln_61 = retrieve_result(daily_ln_61)
 
 # ban
 event_study_plot(result_hourly_full, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_hourly_bracero55_et.pdf")
 event_study_plot(result_daily_full, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_daily_bracero55_et.pdf")
 event_study_plot(result_hourly_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_et.pdf")
 event_study_plot(result_daily_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_et.pdf")
 
 # regulation
 event_study_plot(result_hourly_full_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_hourly_bracero55_1961_et.pdf")
 event_study_plot(result_daily_full_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_daily_bracero55_1961_et.pdf")
 event_study_plot(result_hourly_ln_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_hourly_bracero55_1961_et.pdf")
 event_study_plot(result_daily_ln_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_1961_et.pdf")
-
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_daily_bracero55_1961_et.pdf")
 
 # Look for distinction between treatment exposure -------------------------------------
 
@@ -133,22 +156,30 @@ result_daily_ln_high_61 = retrieve_result(daily_ln_high_61)
 
 
 event_study_plot(result_hourly_full_high, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_high_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_hourly_bracero55_high_et.pdf")
 event_study_plot(result_daily_full_high, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_high_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_daily_bracero55_high_et.pdf")
 event_study_plot(result_hourly_ln_high, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_high_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_high_et.pdf")
 event_study_plot(result_daily_ln_high, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_high_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_high_et.pdf")
 
 event_study_plot(result_hourly_full_high_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_high_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_hourly_bracero55_high_1961_et.pdf")
 event_study_plot(result_daily_full_high_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_high_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_daily_bracero55_high_1961_et.pdf")
 event_study_plot(result_hourly_ln_high_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_high_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_hourly_bracero55_high_1961_et.pdf")
 event_study_plot(result_daily_ln_high_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in most exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_high_1961_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_daily_bracero55_high_1961_et.pdf")
 
 ## Low ---------------------------------------------------------------------
 
@@ -163,15 +194,74 @@ result_hourly_ln_low = retrieve_result(hourly_ln_low)
 result_daily_ln_low = retrieve_result(daily_ln_low)
 
 event_study_plot(result_hourly_full_low, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers in low exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_low_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_hourly_bracero55_low_et.pdf")
 event_study_plot(result_daily_full_low, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers in low exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_low_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_daily_bracero55_low_et.pdf")
 event_study_plot(result_hourly_ln_low, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers in low exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_low_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_low_et.pdf")
 event_study_plot(result_daily_ln_low, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers in low exposed States in 1955", 
-                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_low_et.pdf")
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_low_et.pdf")
 
 # Year frequency -----------------------------------------------------
+
+
+## All ---------------------------------------------------------------------
+
+#ban
+hourly_year = feols(realwage_hourly_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year = feols(realwage_daily_year ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+hourly_year_ln = feols(realwage_hourly_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year_ln = feols(realwage_daily_year_ln ~ i(distance_treat_1965_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+
+#regulation
+hourly_year_61 = feols(realwage_hourly_year ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year_61 = feols(realwage_daily_year ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+hourly_year_ln_61 = feols(realwage_hourly_year_ln ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year_ln_61 = feols(realwage_daily_year_ln ~ i(distance_treat_1961_year, mex_frac_55, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+
+#ban
+result_hourly_year = retrieve_result(hourly_year)
+result_daily_year = retrieve_result(daily_year)
+result_hourly_year_ln = retrieve_result(hourly_year_ln)
+result_daily_year_ln = retrieve_result(daily_year_ln)
+
+#regulation
+result_hourly_year_61 = retrieve_result(hourly_year_61)
+result_daily_year_61 = retrieve_result(daily_year_61)
+result_hourly_year_ln_61 = retrieve_result(hourly_year_ln_61)
+result_daily_year_ln_61 = retrieve_result(daily_year_ln_61)
+
+#ban
+event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = F, output_path = "output/figures/regression/1965/real_hourly_bracero55_year_et.pdf")
+event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", 
+                 save = F, output_path = "output/figures/regression/1965/real_daily_bracero55_year_et.pdf")
+event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_year_et.pdf")
+event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_year_et.pdf")
+
+#regulation
+event_study_plot(result_hourly_year_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_hourly_bracero55_year_1961_et.pdf")
+event_study_plot(result_daily_year_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)",
+                 save = T, output_path = "output/figures/regression/1961/real_daily_bracero55_year_1961_et.pdf")
+event_study_plot(result_hourly_year_ln_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_hourly_bracero55_year_1961_et.pdf")
+event_study_plot(result_daily_year_ln_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_daily_bracero55_year_1961_et.pdf")
 
 ## High --------------------------------------------------------------------
 
@@ -202,24 +292,31 @@ result_daily_year_ln_61 = retrieve_result(daily_year_ln_61)
 
 #ban
 event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_high_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_hourly_bracero55_year_high_et.pdf")
 event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_high_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_daily_bracero55_year_high_et.pdf")
 event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_high_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_year_high_et.pdf")
 event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_high_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_year_high_et.pdf")
 
 #regulation
 event_study_plot(result_hourly_year_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_high_1961_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_hourly_bracero55_year_high_1961_et.pdf")
 event_study_plot(result_daily_year_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_high_1961_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)",
+                 save = T, output_path = "output/figures/regression/1961/real_daily_bracero55_year_high_1961_et.pdf")
 event_study_plot(result_hourly_year_ln_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_high_1961_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_hourly_bracero55_year_high_1961_et.pdf")
 event_study_plot(result_daily_year_ln_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_high_1961_et.pdf")
-
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_daily_bracero55_year_high_1961_et.pdf")
 
 ## Low ---------------------------------------------------------------------
 
@@ -236,46 +333,225 @@ result_daily_year_ln = retrieve_result(daily_year_ln)
 
 #ban
 event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", save = T, output_path = "output/figures/regression/real_hourly_bracero55_year_low_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_hourly_bracero55_year_low_et.pdf")
 event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", save = T, output_path = "output/figures/regression/real_daily_bracero55_year_low_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/real_daily_bracero55_year_low_et.pdf")
 event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", save = T, output_path = "output/figures/regression/log_hourly_bracero55_year_low_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)",
+                 save = T, output_path = "output/figures/regression/1965/log_hourly_bracero55_year_low_et.pdf")
 event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
-                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", save = T, output_path = "output/figures/regression/log_daily_bracero55_year_low_et.pdf")
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/log_daily_bracero55_year_low_et.pdf")
 
 # Alternative method of estimations -------------------------------------------------------------
 
-## Sant'Anna/de Chaisemartin ------------------------------------------------------
+## 1958 batch ---------------------------------------------------
+### Quarterly ---------------------------------------------------------------
+# Full sample, quaterly rate
 
-### Formatting Data ---------------------------------------------------------
+# full ban
+hourly_full = feols(realwage_hourly ~ i(distance_treat_1965_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+daily_full = feols(realwage_daily ~ i(distance_treat_1965_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+hourly_ln = feols(ln_realwage_hourly ~ i(distance_treat_1965_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+daily_ln = feols(ln_realwage_daily ~ i(distance_treat_1965_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+# regulation
+hourly_full_61 = feols(realwage_hourly ~ i(distance_treat_1961_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+daily_full_61 = feols(realwage_daily ~ i(distance_treat_1961_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+hourly_ln_61 = feols(ln_realwage_hourly ~ i(distance_treat_1961_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
+daily_ln_61 = feols(ln_realwage_daily ~ i(distance_treat_1961_q, mex_frac_58, ref = -4) | State_FIPS + time_q, cluster = ~State_FIPS, data = tab)
 
-tab_reduced = copy(tab)
-tab_reduced = tab_reduced[, .SD, .SDcols = c('State', 'Year', 'time_q', 'State_FIPS', 'mex_frac_tot', "mex_frac_year",'realwage_hourly', 'realwage_daily',
-                                             "ln_realwage_hourly", "ln_realwage_daily", "realwage_hourly_year", "realwage_daily_year",
-                                             "realwage_hourly_year_ln", "realwage_daily_year_ln", "group")]
+# full ban
+result_hourly_full = retrieve_result(hourly_full)
+result_daily_full = retrieve_result(daily_full)
+result_hourly_ln = retrieve_result(hourly_ln)
+result_daily_ln = retrieve_result(daily_ln)
 
-# Classify groups dynamically, using any() to check conditions across years 1955-1960 for each State
-tab_reduced[Year %in% 1955:1960, treatment_status := fcase(
-  mex_frac_year >= 0.2, "Treated",
-  mex_frac_year > 0 & mex_frac_year < 0.2, "Low_Treated",
-  mex_frac_year == 0, "Non_Treated"
-)]
+# regulation
+result_hourly_full_61 = retrieve_result(hourly_full_61)
+result_daily_full_61 = retrieve_result(daily_full_61)
+result_hourly_ln_61 = retrieve_result(hourly_ln_61)
+result_daily_ln_61 = retrieve_result(daily_ln_61)
 
-# Check stability: flag as switcher if group_cm changes over years 1955-1960
-tab_reduced[Year %in% 1955:1960, stability_check := uniqueN(treatment_status, na.rm = TRUE), by = State]
-tab_reduced[stability_check > 1, switcher_status := "Switcher"]
-tab_reduced[stability_check == 1, switcher_status := "Stayer"]
+# ban
+event_study_plot(result_hourly_full, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = F, output_path = "output/figures/regression/1965/real_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_full, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = F, output_path = "output/figures/regression/1965/real_daily_bracero55_et.pdf")
+event_study_plot(result_hourly_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = F, output_path = "output/figures/regression/1965/log_hourly_bracero55_et.pdf")
+event_study_plot(result_daily_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 save = F, output_path = "output/figures/regression/1965/log_daily_bracero55_et.pdf")
 
-status = na.omit(unique(tab_reduced[, .(State, switcher_status)]))
-tab_reduced[, stability_check := NULL]
-tab_reduced = merge(tab_reduced, status, by = "State", all.x = TRUE)
+# regulation
+event_study_plot(result_hourly_full_61, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_hourly_bracero55_1961_et.pdf")
+event_study_plot(result_daily_full_61, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1961/real_daily_bracero55_1961_et.pdf")
+event_study_plot(result_hourly_ln_61, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers", 
+                 x_label = "Distance to treatment (quarter)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1961/log_hourly_bracero55_1961_et.pdf")
+# event_study_plot(result_daily_ln_61, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers", 
+#                  x_label = "Distance to treatment (quarter)", y_label = "Real Daily Wage (log)", 
+                 
+
+### Yearly ---------------------------------------------------------------
+
+#ban
+hourly_year = feols(realwage_hourly_year ~ i(distance_treat_1965_year, mex_frac_58, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year = feols(realwage_daily_year ~ i(distance_treat_1965_year, mex_frac_58, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+hourly_year_ln = feols(realwage_hourly_year_ln ~ i(distance_treat_1965_year, mex_frac_58, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+daily_year_ln = feols(realwage_daily_year_ln ~ i(distance_treat_1965_year, mex_frac_58, ref = -1) | State_FIPS + Year, cluster = ~State_FIPS, data = tab)
+
+#ban
+result_hourly_year = retrieve_result(hourly_year)
+result_daily_year = retrieve_result(daily_year)
+result_hourly_year_ln = retrieve_result(hourly_year_ln)
+result_daily_year_ln = retrieve_result(daily_year_ln)
+
+#ban
+event_study_plot(result_hourly_year, title = "Effect of Bracero worker exclusion on real hourly wage of seasonal workers, 1958 batch", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/58_batch/real_hourly_bracero58_year_et.pdf")
+event_study_plot(result_daily_year, title = "Effect of Bracero worker exclusion on real daily wage of seasonal workers, 1958 batch", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage ($)", 
+                 save = T, output_path = "output/figures/regression/1965/58_batch/real_daily_bracero58_year_et.pdf")
+event_study_plot(result_hourly_year_ln, title = "Effect of Bracero worker exclusion on log real hourly wage of seasonal workers, 1958 batch", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Hourly Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/58_batch/log_hourly_bracero58_year_et.pdf")
+event_study_plot(result_daily_year_ln, title = "Effect of Bracero worker exclusion on log real daily wage of seasonal workers, 1958 batch", 
+                 x_label = "Distance to treatment (year)", y_label = "Real Daily Wage (log)", 
+                 save = T, output_path = "output/figures/regression/1965/58_batch/log_daily_bracero58_year_et.pdf")
+
+## Synthetic Control --------------------------------------------------------------------
+
+## Synthetic Control --------------------------------------------------------------------
+
+### California --------------------------------------------------------------
+tab_sc <- tab %>%
+  select(all_of(cols)) %>%
+  group_by(State, Year) %>%
+  summarise(mean_hourly_wage = mean(realwage_hourly, na.rm = TRUE),
+            # domestic_seasonal = ln_domestic_seasonal,
+            realwage_hourly = mean(realwage_hourly, na.rm = TRUE),
+            realwage_daily = mean(realwage_daily, na.rm = TRUE),
+            Cotton_machine = mean(Cotton_machine, na.rm = TRUE),
+            Sugarbeet_machine = mean(Sugarbeet_machine, na.rm = TRUE),
+            Tractors = mean(Tractors, na.rm = TRUE),
+            Cotton = mean(Cotton, na.rm = TRUE),
+            Tomatoes_total = mean(Tomatoes_total, na.rm = TRUE),
+            Lettuce = mean(Lettuce, na.rm = TRUE),
+            Strawberries_total = mean(Strawberries_total, na.rm = TRUE),
+            Citrus = mean(Citrus, na.rm = TRUE),
+            Cantaloupes = mean(Cantaloupes, na.rm = TRUE),
+            BrusselsSprouts = mean(BrusselsSprouts, na.rm = TRUE),
+            Asparagus_total = mean(Asparagus_total, na.rm = TRUE),
+            Celery = mean(Celery, na.rm = TRUE),
+            Cucumbers_pickle = mean(Cucumbers_pickle, na.rm = TRUE),
+            .groups = 'drop')
+
+# Filter data to retain only complete rows for all relevant columns
+tab_sc_clean <- tab_sc %>%
+  filter(complete.cases(mean_hourly_wage, Cotton, Tomatoes_total, Strawberries_total, Tractors))
+
+# Drop treated States
+tab_sc_clean = tab_sc_clean %>% 
+  filter(!State %in% c("TX", "AR", "AZ", "COL", "NM", "NV"))
+
+# Synthetic control setup
+synth_output <- tab_sc_clean %>%
+  synthetic_control(outcome = mean_hourly_wage,
+                    unit = State,
+                    time = Year,
+                    i_unit = "CA",
+                    i_time = 1965,
+                    generate_placebos = TRUE) %>%
+  generate_predictor(time_window = 1955:1964,
+                     mean_cotton = mean(Cotton, na.rm = TRUE),
+                     mean_tomatoes = mean(Tomatoes_total, na.rm = TRUE),
+                     mean_strawberries = mean(Strawberries_total, na.rm = TRUE),
+                     mean_tractor = mean(Tractors, na.rm = TRUE)) %>%
+  generate_weights(optimization_window = 1955:1964, 
+                   margin_ipop = .02, sigf_ipop = 7, bound_ipop = 6) %>%
+  generate_control()
+
+# Plot trends
+synth_plot <- synth_output %>% plot_trends()
+ggsave(glue("output/sc/sc_plot_mean_hourly_wage_CA.pdf"), plot = synth_plot, width = 10, height = 8, dpi = 300)
+synth_diff = synth_output %>% plot_differences()
+ggsave(glue("output/sc/sc_diff_mean_hourly_wage_CA.pdf"), plot = synth_diff, width = 10, height = 8, dpi = 300)
+synth_weights = synth_output %>% plot_weights()
+ggsave(glue("output/sc/sc_wieghts_mean_hourly_wage_CA.pdf"), plot = synth_weights, width = 10, height = 8, dpi = 300)
+synth_placebo = synth_output %>% plot_placebos(prune = TRUE)
+ggsave(glue("output/sc/sc_placebo_mean_hourly_wage_CA.pdf"), plot = synth_placebo, width = 10, height = 8, dpi = 300)
+
+### Texas --------------------------------------------------------------
+tab_sc <- tab %>%
+  select(all_of(cols)) %>%
+  group_by(State, Year) %>%
+  summarise(mean_hourly_wage = mean(realwage_hourly, na.rm = TRUE),
+            # domestic_seasonal = ln_domestic_seasonal,
+            realwage_hourly = mean(realwage_hourly, na.rm = TRUE),
+            realwage_daily = mean(realwage_daily, na.rm = TRUE),
+            Cotton_machine = mean(Cotton_machine, na.rm = TRUE),
+            Sugarbeet_machine = mean(Sugarbeet_machine, na.rm = TRUE),
+            Tractors = mean(Tractors, na.rm = TRUE),
+            Cotton = mean(Cotton, na.rm = TRUE),
+            Tomatoes_total = mean(Tomatoes_total, na.rm = TRUE),
+            Lettuce = mean(Lettuce, na.rm = TRUE),
+            Strawberries_total = mean(Strawberries_total, na.rm = TRUE),
+            Citrus = mean(Citrus, na.rm = TRUE),
+            Cantaloupes = mean(Cantaloupes, na.rm = TRUE),
+            BrusselsSprouts = mean(BrusselsSprouts, na.rm = TRUE),
+            Asparagus_total = mean(Asparagus_total, na.rm = TRUE),
+            Celery = mean(Celery, na.rm = TRUE),
+            Cucumbers_pickle = mean(Cucumbers_pickle, na.rm = TRUE),
+            .groups = 'drop')
+
+# Filter data to retain only complete rows for all relevant columns
+tab_sc_clean <- tab_sc %>%
+  filter(complete.cases(mean_hourly_wage, Cotton, Tomatoes_total, Strawberries_total, Tractors))
+
+# Drop treated States
+tab_sc_clean = tab_sc_clean %>% 
+  filter(!State %in% c("CA", "AR", "AZ", "COL", "NM", "NV"))
+
+# Synthetic control setup
+synth_output <- tab_sc_clean %>%
+  synthetic_control(outcome = mean_hourly_wage,
+                    unit = State,
+                    time = Year,
+                    i_unit = "TX",
+                    i_time = 1965,
+                    generate_placebos = TRUE) %>%
+  generate_predictor(time_window = 1955:1964,
+                     mean_cotton = mean(Cotton, na.rm = TRUE),
+                     mean_tomatoes = mean(Tomatoes_total, na.rm = TRUE),
+                     mean_strawberries = mean(Strawberries_total, na.rm = TRUE),
+                     mean_tractor = mean(Tractors, na.rm = TRUE)) %>%
+  generate_weights(optimization_window = 1955:1964, 
+                   margin_ipop = .02, sigf_ipop = 7, bound_ipop = 6) %>%
+  generate_control()
+
+# Plot trends
+synth_plot <- synth_output %>% plot_trends()
+ggsave(glue("output/sc/sc_plot_mean_hourly_wage_TX.pdf"), plot = synth_plot, width = 10, height = 8, dpi = 300)
+synth_diff = synth_output %>% plot_differences()
+ggsave(glue("output/sc/sc_diff_mean_hourly_wage_TX.pdf"), plot = synth_diff, width = 10, height = 8, dpi = 300)
+synth_weights = synth_output %>% plot_weights()
+ggsave(glue("output/sc/sc_wieghts_mean_hourly_wage_TX.pdf"), plot = synth_weights, width = 10, height = 8, dpi = 300)
+synth_placebo = synth_output %>% plot_placebos(prune = TRUE)
+ggsave(glue("output/sc/sc_placebo_mean_hourly_wage_TX.pdf"), plot = synth_placebo, width = 10, height = 8, dpi = 300)
 
 
 
-
-
-## SDiD --------------------------------------------------------------------
 
 
 
