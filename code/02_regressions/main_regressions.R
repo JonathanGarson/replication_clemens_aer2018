@@ -78,7 +78,8 @@ domestic_season_worker = list(
 modelsummary(
   domestic_season_worker,
   output = glue("{output_tables}/table2_domestic_seasonal_worker_employment.png"),
-  title = "TABLE 1: Differences-in-differences with continuous treatment, quarterly (semi elasticities)",
+  title = "TABLE 2: Effects of Bracero Exclusion on Domestic Seasonal Agricultural Employment: 
+Difference-in-Differences with Continuous Treatment, Monthly",
   stars = TRUE,
   coef_rename = c("treatment_frac" = "BraceroExclusion1965 * ExposureToExclusion"),
   gof_omit = 'R2 Within|R2 Within Adj.|AIC|BIC|RMSE|Std.Errors'
@@ -107,7 +108,8 @@ type_employment = list(
 modelsummary(
   type_employment,
   output = glue("{output_tables}/table3_type_employment.png"),
-  title = "TABLE 1: Differences-in-differences with continuous treatment, quarterly (semi elasticities)",
+  title = "TABLE 3: Effects of Bracero Exclusion on the Three Types of Domestic Seasonal Agricultural 
+Employment: Difference-in-Differences with Continuous Treatment, Monthly",
   stars = TRUE,
   coef_rename = c("treatment_frac" = "BraceroExclusion1965 * ExposureToExclusion"),
   gof_omit = 'R2 Within|R2 Within Adj.|AIC|BIC|RMSE|Std.Errors'
